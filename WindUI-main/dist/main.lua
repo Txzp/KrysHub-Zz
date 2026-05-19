@@ -13355,10 +13355,36 @@ O,
 local Q={}
 
 for R,S in next,H.Buttons do
-local T=
-ap(S.Title,S.Icon,S.Callback,S.Variant,P,J,true)
-table.insert(Q,T)
-T.Size=UDim2.new(1,0,1,0)
+    local T = ap(S.Title,S.Icon,S.Callback,S.Variant,P,J,true)
+    table.insert(Q,T)
+    T.Size = UDim2.new(1,0,1,0)
+
+    -- Force Cancel/Confirm button colors regardless of theme
+    pcall(function()
+        if S.Title == "Cancel" then
+            if T.Button and T.Button.ImageLabel then
+                T.Button.ImageLabel.ImageColor3 = Color3.fromRGB(255, 70, 70)
+                T.Button.ImageLabel.ImageTransparency = 0
+            end
+            if T.Button and T.Button.ImageColor3 ~= nil then
+                T.Button.ImageColor3 = Color3.fromRGB(255, 70, 70)
+            end
+            if T.TextLabel then
+                T.TextLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
+            end
+        elseif S.Title == "Confirm" then
+            if T.Button and T.Button.ImageLabel then
+                T.Button.ImageLabel.ImageColor3 = Color3.fromRGB(80, 255, 120)
+                T.Button.ImageLabel.ImageTransparency = 0
+            end
+            if T.Button and T.Button.ImageColor3 ~= nil then
+                T.Button.ImageColor3 = Color3.fromRGB(80, 255, 120)
+            end
+            if T.TextLabel then
+                T.TextLabel.TextColor3 = Color3.fromRGB(80, 255, 120)
+            end
+        end
+    end)
 end
 
 
@@ -13426,24 +13452,24 @@ if not au.IgnoreAlerts then
 F=true
 
 au:Dialog{
-    Title="Close | GnsysHub", -- Título personalizado
-    Content="Are you sure you want to close the GnsysHub interface?", -- Descripción personalizada
+    Title="Close | KrysHub", -- Título personalizado
+    Content="Are you sure you want to close the KrysHub interface?",
     Buttons={
         {
             Title="Cancel",
             Callback=function()
                 F=false
             end,
-            Variant="Secondary", -- Botón Cancelar normal
+            Variant="Secondary",
         },
         {
-            Title="Confirm", -- Texto del botón cambiado
+            Title="Confirm",
             Callback=function()
                 F=false
                 au:Destroy()
             end,
             Variant="Primary", 
-            Color=Color3.fromRGB(255, 60, 60), -- Fuerza el color ROJO brillante
+            Color=Color3.fromRGB(255, 60, 60),
         },
     },
 }
