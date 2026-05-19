@@ -10,7 +10,7 @@ task.wait(3)
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Txzp/Astras-Zzz/main/WindUI-main/dist/main.lua?t=" .. os.time()))()
 
 local Window = WindUI:CreateWindow({
-    Title = "GnsysHub Zz | Esok Sekolah",
+    Title = "KrysHub | Esok Sekolah",
     Icon = "rocket",
     Theme = "Dark",
     Size = UDim2.fromOffset(450, 400),
@@ -538,7 +538,7 @@ if IsMobile then
     end
 end
 
-notify("GnsysHub Zz", "Loading GnsysHub Zz | Esok Sekolah", 3)
+notify("KrysHub", "Loading KrysHub | Esok Sekolah", 3)
 
-print("[GnsysHub] Script cargado")
-print("[GnsysHub] Mobile: " .. (IsMobile and "SÍ" or "NO"))
+print("[KrysHub] Script Working")
+print("[KrysHub] Mobile: " .. (IsMobile and "SÍ" or "NO"))
