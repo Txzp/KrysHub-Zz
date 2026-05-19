@@ -13359,7 +13359,7 @@ for R,S in next,H.Buttons do
     table.insert(Q,T)
     T.Size = UDim2.new(1,0,1,0)
 
-    -- Force Cancel/Confirm button colors regardless of theme
+    -- Force Cancel/Confirm button colors regardless of theme (initial pass)
     pcall(function()
         if S.Title == "Cancel" then
             if T.Button and T.Button.ImageLabel then
@@ -13383,6 +13383,81 @@ for R,S in next,H.Buttons do
             if T.TextLabel then
                 T.TextLabel.TextColor3 = Color3.fromRGB(80, 255, 120)
             end
+        end
+    end)
+end
+
+-- Persistent enforcement: ensure colors are re-applied after final render and on re-renders
+local function enforceDialogButtonColors()
+    for i,S in next,H.Buttons do
+        local T = Q[i]
+        -- fallback: try to find by text if T is missing or was recreated
+        if not T and J and J.UIElements and J.UIElements.Main then
+            for _,desc in next, J.UIElements.Main:GetDescendants() do
+                if desc:IsA("TextButton") and desc.Text == S.Title then
+                    -- assume parent container holds the structured button
+                    T = desc.Parent
+                    break
+                end
+            end
+        end
+
+        pcall(function()
+            if not T then return end
+            if S.Title == "Cancel" then
+                if T.Button and T.Button.ImageLabel then
+                    T.Button.ImageLabel.ImageColor3 = Color3.fromRGB(255, 70, 70)
+                    T.Button.ImageLabel.ImageTransparency = 0
+                end
+                if T.Button and T.Button.ImageColor3 ~= nil then
+                    T.Button.ImageColor3 = Color3.fromRGB(255, 70, 70)
+                end
+                if T.TextLabel then
+                    T.TextLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
+                end
+            elseif S.Title == "Confirm" then
+                if T.Button and T.Button.ImageLabel then
+                    T.Button.ImageLabel.ImageColor3 = Color3.fromRGB(80, 255, 120)
+                    T.Button.ImageLabel.ImageTransparency = 0
+                end
+                if T.Button and T.Button.ImageColor3 ~= nil then
+                    T.Button.ImageColor3 = Color3.fromRGB(80, 255, 120)
+                end
+                if T.TextLabel then
+                    T.TextLabel.TextColor3 = Color3.fromRGB(80, 255, 120)
+                end
+            end
+        end)
+    end
+end
+
+-- Wrap J.Open to enforce colors right after open finishes
+if J and J.Open then
+    local _oldOpen = J.Open
+    J.Open = function(...)
+        _oldOpen(...)
+        task.spawn(function()
+            task.wait(0.05)
+            enforceDialogButtonColors()
+        end)
+    end
+end
+
+-- Re-apply when new descendants are added (covers re-renders)
+if J and J.UIElements and J.UIElements.Main then
+    J.UIElements.Main.DescendantAdded:Connect(function()
+        task.spawn(function()
+            task.wait(0.05)
+            enforceDialogButtonColors()
+        end)
+    end)
+    -- Also enforce when visibility changes (dialog shown)
+    J.UIElements.Main:GetPropertyChangedSignal("Visible"):Connect(function()
+        if J.UIElements.Main.Visible then
+            task.spawn(function()
+                task.wait(0.05)
+                enforceDialogButtonColors()
+            end)
         end
     end)
 end
