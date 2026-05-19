@@ -13428,25 +13428,23 @@ F=true
 au:Dialog({
     Title = "Close | KrysHub", -- Título personalizado como pediste
     Content = "Are you sure you want to close the KrysHub interface?",
-    Buttons = {
-        {
-            Title = "Cancel",
-            Callback = function()
-                F = false
-            end,
-            -- Color ROJO fijo
-            Color = Color3.fromRGB(255, 70, 70)
-        },
-        {
-            Title = "Confirm",
-            Callback = function()
-                F = false
-                au:Destroy()
-            end,
-            -- Color VERDE fijo
-            Color = Color3.fromRGB(80, 255, 120)
-        },
+Buttons = {
+    {
+        Title = "Cancel",
+        Variant = "Secondary",
+        Callback = function()
+            F = false
+        end
     },
+    {
+        Title = "Confirm",
+        Variant = "Primary",
+        Callback = function()
+            F = false
+            au:Destroy()
+        end
+    }
+}
 })
 else
 au:Destroy()
