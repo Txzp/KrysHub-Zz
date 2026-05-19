@@ -7910,6 +7910,7 @@ if ax.Locked then
 return
 end
 Callback(aw.Callback or function()end)
+ar:Close(true)
 end)
 end
 
