@@ -4947,12 +4947,13 @@ am,
 ac("UICorner",{
 CornerRadius=UDim.new(1,0)
 }),
-ac("UIStroke",{
-Thickness=1.5,
-ApplyStrokeMode="Border",
-Color=Color3.new(1,1,1),
-Transparency=0,
-},{
+    ac("UIStroke",{
+    Thickness=1.5,
+    ApplyStrokeMode="Border",
+    Color=Color3.new(1,1,1),
+    Transparency=1,
+    Enabled=false,
+    },{
 ac("UIGradient",{
 Color=ColorSequence.new(Color3.fromHex"40c9ff",Color3.fromHex"e81cff")
 })
@@ -5119,14 +5120,22 @@ if ar.Icon then
 ag:SetIcon(ar.Icon)
 end
 
-an.UIStroke.UIGradient.Color=ar.Color
-if Glow then
-Glow.UIGradient.Color=ar.Color
-end
+    -- Disable UIStroke visuals for flatter look
+    if an.UIStroke then
+        an.UIStroke.Enabled = false
+        an.UIStroke.Transparency = 1
+        local grad = an.UIStroke:FindFirstChildOfClass("UIGradient")
+        if grad then
+            grad.Transparency = NumberSequence.new(1)
+        end
+    end
+    -- Disable any glow gradient used by the button
+    if Glow and Glow.UIGradient then
+        Glow.UIGradient.Transparency = NumberSequence.new(1)
+    end
 
-an.UICorner.CornerRadius=ar.CornerRadius
-an.TextButton.UICorner.CornerRadius=UDim.new(ar.CornerRadius.Scale,ar.CornerRadius.Offset-4)
-an.UIStroke.Thickness=ar.StrokeThickness
+    an.UICorner.CornerRadius=ar.CornerRadius
+    an.TextButton.UICorner.CornerRadius=UDim.new(ar.CornerRadius.Scale,ar.CornerRadius.Offset-4)
 
 ag:SetScale(ar.Scale)
 end
@@ -8718,13 +8727,14 @@ Position=UDim2.new(0.5,0,0,0),
 Parent=HueDragHolder,
 BackgroundColor3=ax.Default
 },{
-ae("UIStroke",{
-Thickness=2,
-Transparency=.1,
-ThemeTag={
-Color="Text",
-},
-}),
+    ae("UIStroke",{
+    Thickness=2,
+    Transparency=1,
+    Enabled=false,
+    ThemeTag={
+    Color="Text",
+    },
+    }),
 ae("UICorner",{
 CornerRadius=UDim.new(1,0),
 })
@@ -8921,13 +8931,14 @@ Parent=l,
 
 BackgroundColor3=ax.Default
 },{
-ae("UIStroke",{
-Thickness=2,
-Transparency=.1,
-ThemeTag={
-Color="Text",
-},
-}),
+    ae("UIStroke",{
+    Thickness=2,
+    Transparency=1,
+    Enabled=false,
+    ThemeTag={
+    Color="Text",
+    },
+    }),
 ae("UICorner",{
 CornerRadius=UDim.new(1,0),
 })
@@ -9054,13 +9065,14 @@ BackgroundColor3="Text",
 Parent=H,
 
 },{
-ae("UIStroke",{
-Thickness=2,
-Transparency=.1,
-ThemeTag={
-Color="Text",
-},
-}),
+    ae("UIStroke",{
+    Thickness=2,
+    Transparency=1,
+    Enabled=false,
+    ThemeTag={
+    Color="Text",
+    },
+    }),
 ae("UICorner",{
 CornerRadius=UDim.new(1,0),
 })
@@ -12862,7 +12874,7 @@ Enum.EasingStyle.Quint,
 Enum.EasingDirection.Out
 ):Play()
 if UIStroke then
-an(UIStroke,0.25,{Transparency=0.8},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+    an(UIStroke,0.25,{Transparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
 end
 
 task.spawn(function()
