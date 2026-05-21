@@ -12862,7 +12862,7 @@ end
 end
 
 if au.OpenButtonMain and au.IsOpenButtonEnabled then
-au.OpenButtonMain:Visible(false)
+au.OpenButtonMain.Visible = false
 end
 
 
