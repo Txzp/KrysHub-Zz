@@ -14091,7 +14091,7 @@ local function CreateGnsysUserProfile(ParentFrame)
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Name = "Gnsys_UserProfile_Frame"
     ProfileFrame.Size = UDim2.new(1, 0, 0, 60)
-    ProfileFrame.Position = UDim2.new(0, 0, 1, -60) -- Anclado abajo
+    ProfileFrame.Position = UDim2.new(0, 0, 1, -60)
     ProfileFrame.BackgroundColor3 = Color3.fromHex("#0f0f0f")
     ProfileFrame.BackgroundTransparency = 0
     ProfileFrame.BorderSizePixel = 0
@@ -14123,7 +14123,7 @@ local function CreateGnsysUserProfile(ParentFrame)
     Avatar.Parent = ProfileFrame
     
     local AvatarCorner = Instance.new("UICorner")
-    AvatarCorner.CornerRadius = UDim.new(1, 0) -- Círculo perfecto
+    AvatarCorner.CornerRadius = UDim.new(1, 0)
     AvatarCorner.Parent = Avatar
     
     local AvatarStroke = Instance.new("UIStroke")
@@ -14150,7 +14150,7 @@ local function CreateGnsysUserProfile(ParentFrame)
     return ProfileFrame
 end
 
--- Exportar la función para que pueda ser llamada desde el script principal o internamente
+-- Exportar la función para que pueda ser llamada desde el script principal
 if WindUI then
     WindUI.CreateUserProfile = CreateGnsysUserProfile
 end
