@@ -14075,4 +14075,84 @@ end
 return b
 end
 
+-- ==============================================================================
+-- GnsysHub Zz | USER PROFILE COMPONENT (Final Modification)
+-- ==============================================================================
+
+local function CreateGnsysUserProfile(ParentFrame)
+    if not ParentFrame then return end
+    
+    local LocalPlayer = game.Players.LocalPlayer
+    if not LocalPlayer then return end
+    
+    local UserId = LocalPlayer:GetUserId()
+    
+    -- 1. Contenedor Principal
+    local ProfileFrame = Instance.new("Frame")
+    ProfileFrame.Name = "Gnsys_UserProfile_Frame"
+    ProfileFrame.Size = UDim2.new(1, 0, 0, 60)
+    ProfileFrame.Position = UDim2.new(0, 0, 1, -60) -- Anclado abajo
+    ProfileFrame.BackgroundColor3 = Color3.fromHex("#0f0f0f")
+    ProfileFrame.BackgroundTransparency = 0
+    ProfileFrame.BorderSizePixel = 0
+    ProfileFrame.Parent = ParentFrame
+    
+    local ProfileCorner = Instance.new("UICorner")
+    ProfileCorner.CornerRadius = UDim.new(0, 8)
+    ProfileCorner.Parent = ProfileFrame
+    
+    -- 2. Línea Separadora
+    local Separator = Instance.new("Frame")
+    Separator.Name = "Gnsys_Profile_Separator"
+    Separator.Size = UDim2.new(1, -20, 0, 1)
+    Separator.Position = UDim2.new(0, 10, 0, 0)
+    Separator.BackgroundColor3 = Color3.fromHex("#333333")
+    Separator.BackgroundTransparency = 0.5
+    Separator.BorderSizePixel = 0
+    Separator.Parent = ProfileFrame
+    
+    -- 3. Avatar
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Name = "Gnsys_Avatar_Image"
+    Avatar.Size = UDim2.new(0, 40, 0, 40)
+    Avatar.Position = UDim2.new(0, 10, 0, 10)
+    Avatar.BackgroundTransparency = 1
+    Avatar.BorderSizePixel = 0
+    Avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. UserId .. "&width=420&height=420&format=png"
+    Avatar.ScaleType = Enum.ScaleType.Stretch
+    Avatar.Parent = ProfileFrame
+    
+    local AvatarCorner = Instance.new("UICorner")
+    AvatarCorner.CornerRadius = UDim.new(1, 0) -- Círculo perfecto
+    AvatarCorner.Parent = Avatar
+    
+    local AvatarStroke = Instance.new("UIStroke")
+    AvatarStroke.Thickness = 2
+    AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
+    AvatarStroke.Parent = Avatar
+    
+    -- 4. Username Text
+    local UsernameText = Instance.new("TextLabel")
+    UsernameText.Name = "Gnsys_Username_Text"
+    UsernameText.Size = UDim2.new(1, -70, 0, 40)
+    UsernameText.Position = UDim2.new(0, 60, 0, 10)
+    UsernameText.BackgroundTransparency = 1
+    UsernameText.BorderSizePixel = 0
+    UsernameText.Font = Enum.Font.GothamBold
+    UsernameText.TextSize = 14
+    UsernameText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    UsernameText.TextXAlignment = Enum.TextXAlignment.Left
+    UsernameText.TextYAlignment = Enum.TextYAlignment.Center
+    UsernameText.TextWrapped = false
+    UsernameText.Text = "User: " .. LocalPlayer.Name
+    UsernameText.Parent = ProfileFrame
+    
+    return ProfileFrame
+end
+
+-- Exportar la función para que pueda ser llamada desde el script principal o internamente
+if WindUI then
+    WindUI.CreateUserProfile = CreateGnsysUserProfile
+end
+
 return aa
