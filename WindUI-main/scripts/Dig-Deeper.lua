@@ -14,7 +14,7 @@ local Window = WindUI:CreateWindow({
     Folder = "KrysHub"
 })
 
--- TABS (Formato correcto)
+-- TABS
 local MainTab = Window:Tab({
     Title = "Main",
     Icon = "house"
@@ -275,16 +275,20 @@ if IsMobile then
     
     local originalToggle = Window.Toggle
     
-Window.Toggle = function(self, ...)
-    local result = originalToggle(self, ...)
-    
-    task.wait()
-
-    if Window and Window.GUI then
-        OpenButtonMain.Visible = Window.GUI.Visible == false
+    Window.Toggle = function(self, ...)
+        local result = originalToggle(self, ...)
+        
+        task.wait(0.1)
+        
+        local isVisible = false
+        if Window and Window.UIElements and Window.UIElements.Main then
+            isVisible = Window.UIElements.Main.Visible
+        end
+        
+        OpenButtonMain.Visible = not isVisible
+        
+        return result
     end
-
-    return result
 end
 
 -- ============================================================
