@@ -10359,8 +10359,8 @@ Name="SelectionIndicator",
 Size=UDim2.new(0,4,0,16),
 Position=UDim2.new(0,-6,0.5,-8),
 AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundColor3=Color3.fromRGB(255,255,255),
-BackgroundTransparency=1,
+BackgroundColor3=Color3.fromRGB(0,0,0), -- <--- CAMBIADO A NEGRO (Para Light)
+BackgroundTransparency=0, -- <--- CAMBIADO A 0 PARA QUE SE VEA
 LayoutOrder=0,
 Parent=ap.UIElements.Main.Frame,
 },{
