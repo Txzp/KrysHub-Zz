@@ -7,7 +7,7 @@
 
 task.wait(3)
 
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Txzp/KrysHub-Zz/main/WindUI-main/dist/main.lua?t=" .. os.time()))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Txzp/KrysHub-Zzz/main/WindUI-main/dist/main.lua?t=" .. os.time()))()
 
 local Window = WindUI:CreateWindow({
     Title = "KrysHub | Esok Sekolah",
