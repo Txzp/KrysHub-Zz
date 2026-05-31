@@ -10355,18 +10355,18 @@ PaddingBottom=UDim.new(0,ap.TabPaddingY),
 },true)
 
 ap.UIElements.SelectionIndicator=aj("Frame",{
-Name="SelectionIndicator",
-Size=UDim2.new(0,4,0,16),
-Position=UDim2.new(0,-6,0.5,-8),
-AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundColor3=Color3.fromRGB(0,0,0), -- <--- CAMBIADO A NEGRO (Para Light)
-BackgroundTransparency=0, -- <--- CAMBIADO A 0 PARA QUE SE VEA
-LayoutOrder=0,
-Parent=ap.UIElements.Main.Frame,
+    Name="SelectionIndicator",
+    Size=UDim2.new(0,4,0,16),
+    Position=UDim2.new(0,-6,0.5,-8),
+    AnchorPoint=Vector2.new(0.5,0.5),
+    BackgroundColor3=Color3.fromRGB(0,0,0), -- <--- PONEMOS NEGRO POR DEFECTO (Para que se vea en Light)
+    BackgroundTransparency=0, -- <--- IMPORTANTE: 0 para que sea VISIBLE, no 1
+    LayoutOrder=0,
+    Parent=ap.UIElements.Main.Frame,
 },{
-aj("UICorner",{
-CornerRadius=UDim.new(0,2),
-}),
+    aj("UICorner",{
+        CornerRadius=UDim.new(0,2),
+    }),
 })
 
 local ar=0
