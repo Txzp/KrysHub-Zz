@@ -3657,56 +3657,58 @@ return aa end function a.u()
 return function(aa,ab)
 return{
 Dark={
-    Name="Dark",
-    Accent=Color3.fromHex"#18181b",
-    Dialog=Color3.fromHex"#1A1A1A",
-    Outline=Color3.fromHex"#FFFFFF",
-    Text=Color3.fromHex"#FFFFFF",
-    Placeholder=Color3.fromHex"#7a7a7a",
-    Background=Color3.fromHex"#050505",
-    Button=Color3.fromHex"#52525b",
-    Icon=Color3.fromHex"#a1a1aa",
-    Toggle=Color3.fromRGB(88, 101, 242), -- Azul Discord
-    Slider=Color3.fromRGB(255,0,0), -- Rojo
-    Checkbox=Color3.fromRGB(88, 101, 242),
-    TabIndicator=Color3.fromHex"#FFFFFF", -- <--- NEGRO PARA DARK
-    PanelBackground=Color3.fromHex"#FFFFFF",
-    PanelBackgroundTransparency=0.95,
-    SliderIcon=Color3.fromHex"#908F95",
-    Primary=Color3.fromHex"#0091FF",
-    LabelBackground=Color3.fromHex"#000000",
-    LabelBackgroundTransparency=0.83,
-    ElementBackground=Color3.fromHex"#1A1A1A",
-    ElementBackgroundTransparency=0,
-    ElementBorder=Color3.fromHex"#191919",
-    ElementBorderTransparency=0.5,
+Name="Dark",
+Accent=Color3.fromHex"#18181b",
+Dialog=Color3.fromHex"#1A1A1A",
+Outline=Color3.fromHex"#FFFFFF",
+Text=Color3.fromHex"#FFFFFF",
+Placeholder=Color3.fromHex"#7a7a7a",
+Background=Color3.fromHex"#050505",
+Button=Color3.fromHex"#52525b", -- Botones normales (gris oscuro)
+Icon=Color3.fromHex"#a1a1aa",
+Toggle=Color3.fromRGB(88, 101, 242), -- <--- CAMBIADO A AZUL DISCORD (Esto es lo que querías)
+Slider=Color3.fromRGB(255,0,0), -- <--- Cambiado a rojo
+Checkbox=Color3.fromRGB(88, 101, 242), -- Opcional: Checkboxes Azules
+PanelBackground=Color3.fromHex"#FFFFFF",
+PanelBackgroundTransparency=0.95,
+SliderIcon=Color3.fromHex"#908F95",
+Primary=Color3.fromHex"#0091FF", -- Botones principales (azul claro por defecto)
+LabelBackground=Color3.fromHex"#000000",
+LabelBackgroundTransparency=0.83,
+ElementBackground=Color3.fromHex"#1A1A1A",
+ElementBackgroundTransparency=0,
+ElementBorder=Color3.fromHex"#191919",
+ElementBorderTransparency=0.5,
 },
-
 Light={
-    Name="Light",
-    Accent=Color3.fromHex"#FFFFFF",
-    Dialog=Color3.fromHex"#f4f4f5",
-    Outline=Color3.fromHex"#ffffff",
-    Text=Color3.fromHex"#000000",
-    Placeholder=Color3.fromHex"#555555",
-    Background=Color3.fromHex"#e9e9e9",
-    Button=Color3.fromHex"#18181b",
-    Icon=Color3.fromHex"#52525b",
-    Toggle=Color3.fromHex"#33C759",
-    Slider=Color3.fromHex"#0091FF",
-    Checkbox=Color3.fromHex"#0091FF",
-    TabBackground=Color3.fromHex"#ffffff",
-    TabBackgroundHover=Color3.fromHex"#ffffff",
-    TabBackgroundHoverTransparency=0.5,
-    TabBackgroundActive=Color3.fromHex"#ffffff",
-    TabBackgroundActiveTransparency=0,
-    TabIndicator=Color3.fromRGB(0, 0, 0), -- <--- BLANCO PARA DARk
-    PanelBackground=Color3.fromHex"#FFFFFF",
-    PanelBackgroundTransparency=0,
-    LabelBackground=Color3.fromHex"#ffffff",
-    LabelBackgroundTransparency=0,
-    ElementBackground=Color3.fromHex"#EEEEEE",
-    ElementBackgroundTransparency=0,
+Name="Light",
+
+Accent=Color3.fromHex"#FFFFFF",
+Dialog=Color3.fromHex"#f4f4f5",
+Outline=Color3.fromHex"#ffffff",
+Text=Color3.fromHex"#000000",
+Placeholder=Color3.fromHex"#555555",
+Background=Color3.fromHex"#e9e9e9",
+Button=Color3.fromHex"#18181b",
+Icon=Color3.fromHex"#52525b",
+Toggle=Color3.fromHex"#33C759",
+Slider=Color3.fromHex"#0091FF",
+Checkbox=Color3.fromHex"#0091FF",
+
+TabBackground=Color3.fromHex"#ffffff",
+TabBackgroundHover=Color3.fromHex"#ffffff",
+TabBackgroundHoverTransparency=0.5,
+TabBackgroundActive=Color3.fromHex"#ffffff",
+TabBackgroundActiveTransparency=0,
+
+PanelBackground=Color3.fromHex"#FFFFFF",
+PanelBackgroundTransparency=0,
+
+LabelBackground=Color3.fromHex"#ffffff",
+LabelBackgroundTransparency=0,
+
+ElementBackground=Color3.fromHex"#EEEEEE",
+ElementBackgroundTransparency=0,
 },
 
 Rose={
@@ -10355,21 +10357,18 @@ PaddingBottom=UDim.new(0,ap.TabPaddingY),
 },true)
 
 ap.UIElements.SelectionIndicator=aj("Frame",{
-    Name="SelectionIndicator",
-    Size=UDim2.new(0,4,0,16),
-    Position=UDim2.new(0,-6,0.5,-8),
-    AnchorPoint=Vector2.new(0.5,0.5),
-    -- CAMBIO AQUÍ: Usar ThemeTag para que lea "TabIndicator" del tema activo
-    ThemeTag = {
-        BackgroundColor3 = "TabIndicator"
-    },
-    BackgroundTransparency=0,
-    LayoutOrder=0,
-    Parent=ap.UIElements.Main.Frame,
+Name="SelectionIndicator",
+Size=UDim2.new(0,4,0,16),
+Position=UDim2.new(0,-6,0.5,-8),
+AnchorPoint=Vector2.new(0.5,0.5),
+BackgroundColor3=Color3.fromRGB(255,255,255),
+BackgroundTransparency=1,
+LayoutOrder=0,
+Parent=ap.UIElements.Main.Frame,
 },{
-    aj("UICorner",{
-        CornerRadius=UDim.new(0,2),
-    }),
+aj("UICorner",{
+CornerRadius=UDim.new(0,2),
+}),
 })
 
 local ar=0
