@@ -14075,13 +14075,8 @@ end
 return b
 end
 
--- ==============================================================================
--- GnsysHub Zz | USER PROFILE COMPONENT (Fixed & Optimized)
--- ==============================================================================
-
-local function CreateGnsysProfile(ParentFrame)
+local function CreateUserProfile(ParentFrame)
     if not ParentFrame then return end
-    
     local LocalPlayer = game.Players.LocalPlayer
     if not LocalPlayer then return end
     
@@ -14094,7 +14089,7 @@ local function CreateGnsysProfile(ParentFrame)
     ProfileFrame.BackgroundColor3 = Color3.fromHex("#0f0f0f")
     ProfileFrame.BackgroundTransparency = 0
     ProfileFrame.BorderSizePixel = 0
-    ProfileFrame.LayoutOrder = 9999 -- Para que quede al final
+    ProfileFrame.LayoutOrder = 9999 -- Siempre al final
     ProfileFrame.Parent = ParentFrame
     
     local ProfileCorner = Instance.new("UICorner")
