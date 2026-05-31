@@ -3659,7 +3659,7 @@ return{
 Dark={
 Name="Dark",
 Accent=Color3.fromHex"#18181b",
-Dialog=Color3.fromHex"#000000",
+Dialog=Color3.fromHex"#1A1A1A",
 Outline=Color3.fromHex"#FFFFFF",
 Text=Color3.fromHex"#FFFFFF",
 Placeholder=Color3.fromHex"#7a7a7a",
@@ -13438,7 +13438,7 @@ if not au.IgnoreAlerts then
 F=true
 
 au:Dialog({
-    Title = "Close | KrysHub",
+    Title = "Close | KrysHub", -- Título personalizado como pediste
     Content = "Are you sure you want to close the KrysHub interface?",
 Buttons = {
     {
