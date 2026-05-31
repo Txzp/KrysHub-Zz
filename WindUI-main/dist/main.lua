@@ -3664,7 +3664,7 @@ Outline=Color3.fromHex"#FFFFFF",
 Text=Color3.fromHex"#FFFFFF",
 Placeholder=Color3.fromHex"#7a7a7a",
 Background=Color3.fromHex"#050505",
-Button=Color3.fromHex"#212121", -- Botones normales (gris oscuro)
+Button=Color3.fromHex"#52525b", -- Botones normales (gris oscuro)
 Icon=Color3.fromHex"#a1a1aa",
 Toggle=Color3.fromRGB(88, 101, 242), -- <--- CAMBIADO A AZUL DISCORD (Esto es lo que querías)
 Slider=Color3.fromRGB(255,0,0), -- <--- Cambiado a rojo
@@ -14076,11 +14076,15 @@ return b
 end
 
 local function CreateUserProfile(ParentFrame)
-    if not ParentFrame then return end
+    if not ParentFrame then
+        return
+    end
+
     local LocalPlayer = game.Players.LocalPlayer
-    if not LocalPlayer then return end
-    
-    -- Contenedor Principal
+    if not LocalPlayer then
+        return
+    end
+
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Name = "Gnsys_UserProfile_Frame"
     ProfileFrame.Size = UDim2.new(1, 0, 0, 60)
@@ -14089,63 +14093,62 @@ local function CreateUserProfile(ParentFrame)
     ProfileFrame.BackgroundColor3 = Color3.fromHex("#0f0f0f")
     ProfileFrame.BackgroundTransparency = 0
     ProfileFrame.BorderSizePixel = 0
-    ProfileFrame.LayoutOrder = 9999 -- Siempre al final
+    ProfileFrame.LayoutOrder = 9999
     ProfileFrame.Parent = ParentFrame
-    
+
     local ProfileCorner = Instance.new("UICorner")
     ProfileCorner.CornerRadius = UDim.new(0, 8)
     ProfileCorner.Parent = ProfileFrame
-    
-    -- Separador
-    local Separator = Instance.new("Frame")
-    Separator.Name = "Gnsys_Profile_Separator"
-    Separator.Size = UDim2.new(1, -20, 0, 1)
-    Separator.Position = UDim2.new(0, 10, 0, 0)
-    Separator.BackgroundColor3 = Color3.fromHex("#333333")
-    Separator.BackgroundTransparency = 0.5
-    Separator.BorderSizePixel = 0
-    Separator.Parent = ProfileFrame
-    
-    -- Avatar
-    local Avatar = Instance.new("ImageLabel")
-    Avatar.Name = "Gnsys_Avatar_Image"
-    Avatar.Size = UDim2.new(0, 40, 0, 40)
-    Avatar.Position = UDim2.new(0, 10, 0, 10)
-    Avatar.BackgroundTransparency = 1
-    Avatar.BorderSizePixel = 0
-    Avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. tostring(LocalPlayer.UserId) .. "&width=420&height=420&format=png"
-    Avatar.ScaleType = Enum.ScaleType.Stretch
-    Avatar.Parent = ProfileFrame
-    
+
+    local SeparatorFrame = Instance.new("Frame")
+    SeparatorFrame.Name = "Gnsys_Profile_Separator"
+    SeparatorFrame.Size = UDim2.new(1, -20, 0, 1)
+    SeparatorFrame.Position = UDim2.new(0, 10, 0, 0)
+    SeparatorFrame.BackgroundColor3 = Color3.fromHex("#333333")
+    SeparatorFrame.BackgroundTransparency = 0.5
+    SeparatorFrame.BorderSizePixel = 0
+    SeparatorFrame.Parent = ProfileFrame
+
+    local AvatarImage = Instance.new("ImageLabel")
+    AvatarImage.Name = "Gnsys_Avatar_Image"
+    AvatarImage.Size = UDim2.new(0, 40, 0, 40)
+    AvatarImage.Position = UDim2.new(0, 10, 0, 10)
+    AvatarImage.BackgroundTransparency = 1
+    AvatarImage.BorderSizePixel = 0
+    AvatarImage.ScaleType = Enum.ScaleType.Stretch
+    AvatarImage.Image =
+        "https://www.roblox.com/headshot-thumbnail/image?userId="
+        .. tostring(LocalPlayer.UserId)
+        .. "&width=420&height=420&format=png"
+    AvatarImage.Parent = ProfileFrame
+
     local AvatarCorner = Instance.new("UICorner")
     AvatarCorner.CornerRadius = UDim.new(1, 0)
-    AvatarCorner.Parent = Avatar
-    
+    AvatarCorner.Parent = AvatarImage
+
     local AvatarStroke = Instance.new("UIStroke")
     AvatarStroke.Thickness = 2
     AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
-    AvatarStroke.Parent = Avatar
-    
-    -- Username
-    local Username = Instance.new("TextLabel")
-    Username.Name = "Gnsys_Username_Text"
-    Username.Size = UDim2.new(1, -70, 0, 40)
-    Username.Position = UDim2.new(0, 60, 0, 10)
-    Username.BackgroundTransparency = 1
-    Username.BorderSizePixel = 0
-    Username.Font = Enum.Font.GothamBold
-    Username.TextSize = 14
-    Username.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Username.TextXAlignment = Enum.TextXAlignment.Left
-    Username.TextYAlignment = Enum.TextYAlignment.Center
-    Username.TextWrapped = false
-    Username.Text = "User: " .. LocalPlayer.Name
-    Username.Parent = ProfileFrame
-    
+    AvatarStroke.Parent = AvatarImage
+
+    local UsernameLabel = Instance.new("TextLabel")
+    UsernameLabel.Name = "Gnsys_Username_Text"
+    UsernameLabel.Size = UDim2.new(1, -70, 0, 40)
+    UsernameLabel.Position = UDim2.new(0, 60, 0, 10)
+    UsernameLabel.BackgroundTransparency = 1
+    UsernameLabel.BorderSizePixel = 0
+    UsernameLabel.Font = Enum.Font.GothamBold
+    UsernameLabel.TextSize = 14
+    UsernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UsernameLabel.TextYAlignment = Enum.TextYAlignment.Center
+    UsernameLabel.TextWrapped = false
+    UsernameLabel.Text = "Username: " .. LocalPlayer.Name .. " (@BloxStz)"
+    UsernameLabel.Parent = ProfileFrame
+
     return ProfileFrame
 end
 
--- Exportar la función para que WindUI pueda usarla
-aa.CreateUserProfile = CreateGnsysProfile
+aa.CreateUserProfile = CreateUserProfile
 
 return aa
