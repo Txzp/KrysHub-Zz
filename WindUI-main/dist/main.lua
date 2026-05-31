@@ -505,6 +505,70 @@ v:Disconnect()
 end
 end
 
+    -- Insert user profile separator and profile frame above tabs
+    do
+        local sc = an.UIElements.Menu.Frame.ScrollingFrame
+        local LocalPlayer = game.Players.LocalPlayer
+        if sc and LocalPlayer then
+            local Sep = Instance.new("Frame")
+            Sep.Name = "Gnsys_Profile_Separator_Sidebar"
+            Sep.Size = UDim2.new(1, -20, 0, 1)
+            Sep.Position = UDim2.new(0, 10, 0, 0)
+            Sep.BackgroundColor3 = Color3.fromHex("#333333")
+            Sep.BackgroundTransparency = 0.5
+            Sep.BorderSizePixel = 0
+            Sep.LayoutOrder = -1
+            Sep.Parent = sc
+
+            local ProfileFrame = Instance.new("Frame")
+            ProfileFrame.Name = "Gnsys_UserProfile_Frame"
+            ProfileFrame.Size = UDim2.new(1, 0, 0, 60)
+            ProfileFrame.AnchorPoint = Vector2.new(0, 0)
+            ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
+            ProfileFrame.BackgroundTransparency = 1
+            ProfileFrame.BorderSizePixel = 0
+            ProfileFrame.LayoutOrder = 0
+            ProfileFrame.Parent = sc
+
+            local AvatarImage = Instance.new("ImageLabel")
+            AvatarImage.Name = "Gnsys_Avatar_Image"
+            AvatarImage.Size = UDim2.new(0, 40, 0, 40)
+            AvatarImage.Position = UDim2.new(0, 10, 0, 10)
+            AvatarImage.BackgroundTransparency = 1
+            AvatarImage.BorderSizePixel = 0
+            AvatarImage.ScaleType = Enum.ScaleType.Stretch
+            AvatarImage.Image =
+                "https://www.roblox.com/headshot-thumbnail/image?userId="
+                .. tostring(LocalPlayer.UserId)
+                .. "&width=420&height=420&format=png"
+            AvatarImage.Parent = ProfileFrame
+
+            local AvatarCorner = Instance.new("UICorner")
+            AvatarCorner.CornerRadius = UDim.new(1, 0)
+            AvatarCorner.Parent = AvatarImage
+
+            local AvatarStroke = Instance.new("UIStroke")
+            AvatarStroke.Thickness = 2
+            AvatarStroke.Color = Color3.fromRGB(255, 255, 255)
+            AvatarStroke.Parent = AvatarImage
+
+            local UsernameLabel = Instance.new("TextLabel")
+            UsernameLabel.Name = "Gnsys_Username_Text"
+            UsernameLabel.Size = UDim2.new(1, -70, 0, 40)
+            UsernameLabel.Position = UDim2.new(0, 60, 0, 10)
+            UsernameLabel.BackgroundTransparency = 1
+            UsernameLabel.BorderSizePixel = 0
+            UsernameLabel.Font = Enum.Font.GothamBold
+            UsernameLabel.TextSize = 14
+            UsernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            UsernameLabel.TextYAlignment = Enum.TextYAlignment.Center
+            UsernameLabel.TextWrapped = false
+            UsernameLabel.Text = "Username: " .. LocalPlayer.Name
+            UsernameLabel.Parent = ProfileFrame
+        end
+    end
+
 function p.SafeCallback(r,...)
 if not r then
 return
