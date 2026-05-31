@@ -10359,8 +10359,11 @@ ap.UIElements.SelectionIndicator=aj("Frame",{
     Size=UDim2.new(0,4,0,16),
     Position=UDim2.new(0,-6,0.5,-8),
     AnchorPoint=Vector2.new(0.5,0.5),
-    BackgroundColor3=Color3.fromRGB(0,0,0), -- <--- PONEMOS NEGRO POR DEFECTO (Para que se vea en Light)
-    BackgroundTransparency=0, -- <--- IMPORTANTE: 0 para que sea VISIBLE, no 1
+    -- CAMBIO AQUÍ: Usar ThemeTag para que lea "TabIndicator" del tema activo
+    ThemeTag = {
+        BackgroundColor3 = "TabIndicator"
+    },
+    BackgroundTransparency=0,
     LayoutOrder=0,
     Parent=ap.UIElements.Main.Frame,
 },{
