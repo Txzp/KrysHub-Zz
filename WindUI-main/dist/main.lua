@@ -2151,7 +2151,7 @@ local ab=a.load'c'
 local ac=ab.New
 local ad=ab.Tween
 
-function aa.New(ae,af,ag,ah,ai,aj,ak,al,ao)
+function aa.New(ae,af,ag,ah,ai,aj,ak,al)
 ah=ah or"Primary"
 local am=al or(not ak and 10 or 99)
 local an
@@ -2178,9 +2178,9 @@ BackgroundTransparency=1,
 },{
 ab.NewRoundFrame(am,"Squircle",{
 ThemeTag={
-ImageColor3=ao and nil or (ah~="White"and"Button"or nil),
+ImageColor3=ah~="White"and"Button"or nil,
 },
-ImageColor3=ao or (ah=="White"and Color3.new(1,1,1)or nil),
+ImageColor3=ah=="White"and Color3.new(1,1,1)or nil,
 Size=UDim2.new(1,0,1,0),
 Name="Squircle",
 ImageTransparency=ah=="Primary"and 0 or ah=="White"and 0 or 0.9,
@@ -13368,7 +13368,7 @@ local Q={}
 
 for R,S in next,H.Buttons do
 local T=
-ap(S.Title,S.Icon,S.Callback,S.Variant,P,J,true,S.Color)
+ap(S.Title,S.Icon,S.Callback,S.Variant,P,J,true)
 table.insert(Q,T)
 T.Size=UDim2.new(1,0,1,0)
 end
@@ -13451,7 +13451,6 @@ Buttons = {
     {
         Title = "Confirm",
         Variant = "Primary",
-        Color = Color3.fromRGB(255, 60, 60), -- Rojo personalizado
         Callback = function()
             F = false
             au:Destroy()
