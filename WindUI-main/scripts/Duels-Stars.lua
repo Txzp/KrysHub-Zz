@@ -1,7 +1,7 @@
 -- ============================================================
 -- KrysHub | [🌌] Duel Stars!
--- Click Shoot | ESP (Estable) | FOV Configurable | Settings
--- Versión: 2.0.0 (ESP Fixed)
+-- Click Shoot | ESP (Robusto - No se desactiva) | FOV Configurable
+-- Versión: 2.0.0 (ESP Fixed con lógica Universal Hub)
 -- ============================================================
 
 task.wait(3)
@@ -16,28 +16,11 @@ local Window = WindUI:CreateWindow({
     Folder = "KrysHub"
 })
 
--- ============================================================
 -- TABS
--- ============================================================
-local MainTab = Window:Tab({
-    Title = "Main",
-    Icon = "house"
-})
-
-local CombatTab = Window:Tab({
-    Title = "Combat",
-    Icon = "target"
-})
-
-local ESPTab = Window:Tab({
-    Title = "ESP",
-    Icon = "eye"
-})
-
-local SettingsTab = Window:Tab({
-    Title = "Settings",
-    Icon = "settings"
-})
+local MainTab = Window:Tab({ Title = "Main", Icon = "house" })
+local CombatTab = Window:Tab({ Title = "Combat", Icon = "target" })
+local ESPTab = Window:Tab({ Title = "ESP", Icon = "eye" })
+local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
 -- ============================================================
 -- SERVICIOS
@@ -64,28 +47,28 @@ local clickShootEnabled = false
 local espEnabled = false
 local notificationsEnabled = true
 local fovVisible = true
-local fovColor = "White"
+local fovColor = "Blanco"
 local fovRadius = 150
 local fovCircle = nil
 local lastShotTime = 0
 local shotDelay = 0.15
 
--- ESP
+-- ESP (Robusto - tomado del Universal Hub)
 local espHighlights = {}
 local espCharacterAddedConns = {}
 local ESPColor = Color3.fromRGB(255, 0, 0)
 local espColorNames = {
-    Red = Color3.fromRGB(255, 60, 60),
-    Green = Color3.fromRGB(60, 200, 110),
-    Blue = Color3.fromRGB(80, 160, 255),
-    Yellow = Color3.fromRGB(255, 210, 50),
-    Purple = Color3.fromRGB(255, 0, 255),
-    Orange = Color3.fromRGB(255, 165, 0),
-    White = Color3.fromRGB(255, 255, 255)
+    Rojo = Color3.fromRGB(255, 60, 60),
+    Verde = Color3.fromRGB(60, 200, 110),
+    Azul = Color3.fromRGB(80, 160, 255),
+    Amarillo = Color3.fromRGB(255, 210, 50),
+    Morado = Color3.fromRGB(255, 0, 255),
+    Naranja = Color3.fromRGB(255, 165, 0),
+    Blanco = Color3.fromRGB(255, 255, 255)
 }
-local selectedESPColor = "Red"
+local selectedESPColor = "Rojo"
 
--- FOV Colors
+-- Colores FOV
 local fovColors = {
     Verde = Color3.fromRGB(0, 255, 0),
     Rojo = Color3.fromRGB(255, 0, 0),
@@ -125,7 +108,7 @@ local function isEnemy(player)
 end
 
 -- ============================================================
--- ESP ROBUSTO
+-- ESP ROBUSTO (NO SE DESACTIVA)
 -- ============================================================
 local function addESPToPlayer(player)
     if not espEnabled then return end
@@ -138,12 +121,14 @@ local function addESPToPlayer(player)
     local humanoid = character:FindFirstChild("Humanoid")
     if not humanoid or humanoid.Health <= 0 then return end
 
+    -- Si ya existe un highlight válido, solo actualizar color
     if espHighlights[player] and espHighlights[player].Parent then
         espHighlights[player].FillColor = ESPColor
         espHighlights[player].OutlineColor = ESPColor
         return
     end
 
+    -- Crear nuevo highlight
     local highlight = Instance.new("Highlight")
     highlight.FillColor = ESPColor
     highlight.OutlineColor = ESPColor
@@ -193,7 +178,7 @@ local function setupESPWatcher(player)
     end)
 end
 
--- Conectar eventos
+-- Conectar eventos para todos los jugadores
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
         setupESPWatcher(player)
@@ -221,12 +206,10 @@ LocalPlayer.CharacterAdded:Connect(function()
     updateESP()
 end)
 
--- ============================================================
--- REFUERZO CONSTANTE DEL ESP (FIX DEFINITIVO)
--- ============================================================
+-- REFUERZO CONSTANTE (cada segundo)
 task.spawn(function()
     while true do
-        task.wait(1) -- Cada segundo fuerza la actualización del ESP
+        task.wait(1)
         if espEnabled then
             updateESP()
         end
@@ -583,8 +566,8 @@ ESPTab:Keybind({
 
 ESPTab:Dropdown({
     Title = "ESP Color",
-    Values = {"Red", "Green", "Blue", "Yellow", "Purple", "Orange", "White"},
-    Default = "Red",
+    Values = {"Rojo", "Verde", "Azul", "Amarillo", "Morado", "Naranja", "Blanco"},
+    Default = "Rojo",
     Callback = function(value)
         selectedESPColor = value
         ESPColor = espColorNames[value] or Color3.fromRGB(255, 255, 255)
@@ -637,5 +620,5 @@ notify("KrysHub", "[🌌] Duel Stars!", 5)
 
 print("==========================================")
 print("KrysHub | [🌌] Duel Stars! v2.0.0 (ESP Fixed)")
-print("ESP forced")
+print("ESP forced 1 ")
 print("==========================================")
