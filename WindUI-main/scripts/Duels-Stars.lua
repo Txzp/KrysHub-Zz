@@ -1,7 +1,7 @@
 -- ============================================================
 -- KrysHub | [🌌] Duel Stars!
 -- Click Shoot | ESP (Estable) | FOV Configurable | Settings
--- Versión: 2.0.0 (Final)
+-- Versión: 2.0.0 (ESP Fixed)
 -- ============================================================
 
 task.wait(3)
@@ -12,7 +12,7 @@ local Window = WindUI:CreateWindow({
     Title = "KrysHub | [🌌] Duel Stars!",
     Icon = "rocket",
     Theme = "Dark",
-    Size = UDim2.fromOffset(450, 400), -- <--- Aquí es donde se cambia
+    Size = UDim2.fromOffset(450, 400),
     Folder = "KrysHub"
 })
 
@@ -63,17 +63,17 @@ local FireWeapon = Remotes and Remotes:FindFirstChild("FireWeapon")
 local clickShootEnabled = false
 local espEnabled = false
 local notificationsEnabled = true
-local fovVisible = true       -- Por defecto, el FOV es visible (el toggle "Invisible FOV" estará en false)
-local fovColor = "White"      -- Color del FOV cuando no apunta a enemigo (blanco por defecto)
+local fovVisible = true
+local fovColor = "White"
 local fovRadius = 150
 local fovCircle = nil
 local lastShotTime = 0
 local shotDelay = 0.15
 
--- ESP: Almacenamiento y conexiones robustas (tomado del Universal Hub)
+-- ESP
 local espHighlights = {}
 local espCharacterAddedConns = {}
-local ESPColor = Color3.fromRGB(255, 0, 0)  -- Rojo por defecto
+local ESPColor = Color3.fromRGB(255, 0, 0)
 local espColorNames = {
     Red = Color3.fromRGB(255, 60, 60),
     Green = Color3.fromRGB(60, 200, 110),
@@ -85,7 +85,7 @@ local espColorNames = {
 }
 local selectedESPColor = "Red"
 
--- Colores para el FOV
+-- FOV Colors
 local fovColors = {
     Verde = Color3.fromRGB(0, 255, 0),
     Rojo = Color3.fromRGB(255, 0, 0),
@@ -108,43 +108,42 @@ end
 -- ============================================================
 local function isEnemy(player)
     if player == LocalPlayer then return false end
-    
+
     local myTeam = LocalPlayer.Team
     local theirTeam = player.Team
     if myTeam and theirTeam then
         return myTeam ~= theirTeam
     end
-    
+
     local myTeamAttr = LocalPlayer:GetAttribute("Team")
     local theirTeamAttr = player:GetAttribute("Team")
     if myTeamAttr and theirTeamAttr then
         return myTeamAttr ~= theirTeamAttr
     end
-    
+
     return true
 end
 
 -- ============================================================
--- ESP ROBUSTO (No se desactiva solo)
+-- ESP ROBUSTO
 -- ============================================================
 local function addESPToPlayer(player)
     if not espEnabled then return end
     if player == LocalPlayer then return end
     if not isEnemy(player) then return end
-    
+
     local character = player.Character
     if not character then return end
-    
+
     local humanoid = character:FindFirstChild("Humanoid")
     if not humanoid or humanoid.Health <= 0 then return end
-    
+
     if espHighlights[player] and espHighlights[player].Parent then
-        -- Solo actualizar color si ya existe
         espHighlights[player].FillColor = ESPColor
         espHighlights[player].OutlineColor = ESPColor
         return
     end
-    
+
     local highlight = Instance.new("Highlight")
     highlight.FillColor = ESPColor
     highlight.OutlineColor = ESPColor
@@ -170,8 +169,7 @@ local function updateESP()
         end
         return
     end
-    
-    -- Aplicar ESP a todos los enemigos actuales
+
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and isEnemy(player) then
             addESPToPlayer(player)
@@ -186,7 +184,7 @@ local function setupESPWatcher(player)
     if espCharacterAddedConns[player] then
         espCharacterAddedConns[player]:Disconnect()
     end
-    
+
     espCharacterAddedConns[player] = player.CharacterAdded:Connect(function()
         task.wait(0.5)
         if espEnabled and isEnemy(player) then
@@ -195,7 +193,7 @@ local function setupESPWatcher(player)
     end)
 end
 
--- Conectar eventos para todos los jugadores (actuales y futuros)
+-- Conectar eventos
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
         setupESPWatcher(player)
@@ -224,29 +222,41 @@ LocalPlayer.CharacterAdded:Connect(function()
 end)
 
 -- ============================================================
+-- REFUERZO CONSTANTE DEL ESP (FIX DEFINITIVO)
+-- ============================================================
+task.spawn(function()
+    while true do
+        task.wait(1) -- Cada segundo fuerza la actualización del ESP
+        if espEnabled then
+            updateESP()
+        end
+    end
+end)
+
+-- ============================================================
 -- DETECTAR ENEMIGO EN FOV
 -- ============================================================
 local function getClosestEnemyToCursor()
     local cursorPos = UserInputService:GetMouseLocation()
     local cursorX = cursorPos.X
     local cursorY = cursorPos.Y
-    
+
     local closestTarget = nil
     local closestDistance = fovRadius
     local closestPlayer = nil
-    
+
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and isEnemy(player) and player.Character then
             local humanoid = player.Character:FindFirstChild("Humanoid")
             local head = player.Character:FindFirstChild("Head")
             local targetPart = head or player.Character:FindFirstChild("HumanoidRootPart")
-            
+
             if humanoid and humanoid.Health > 0 and targetPart then
                 local screenPos, isOnScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                
+
                 if isOnScreen then
                     local distanceFromCursor = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(cursorX, cursorY)).Magnitude
-                    
+
                     if distanceFromCursor <= fovRadius and distanceFromCursor < closestDistance then
                         closestDistance = distanceFromCursor
                         closestTarget = targetPart
@@ -256,7 +266,7 @@ local function getClosestEnemyToCursor()
             end
         end
     end
-    
+
     return closestTarget, closestPlayer
 end
 
@@ -266,18 +276,18 @@ end
 local function shootAtEnemy(targetPart, targetPlayer)
     if not targetPart then return false end
     if not FireWeapon then return false end
-    
+
     local character = LocalPlayer.Character
     if not character then return false end
-    
+
     local gunTool = character:FindFirstChild("GunTool") or character:FindFirstChild("Gun")
     if not gunTool then return false end
-    
+
     local handle = gunTool:FindFirstChild("Handle")
     local origin = handle and handle.Position or character:FindFirstChild("HumanoidRootPart").Position
-    
+
     local targetPosition = targetPart.Position
-    
+
     pcall(function()
         FireWeapon:FireServer("Gun", CFrame.new(targetPosition), {
             Origin = origin,
@@ -287,23 +297,23 @@ local function shootAtEnemy(targetPart, targetPlayer)
             EnemyUserId = targetPlayer and targetPlayer.UserId or 0
         })
     end)
-    
+
     return true
 end
 
 -- ============================================================
--- CLICK SHOOT (Sin keybind fijo)
+-- CLICK SHOOT
 -- ============================================================
 local function setupClickShoot()
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
-        
+
         if clickShootEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
             local now = tick()
             if now - lastShotTime < shotDelay then return end
-            
+
             local targetPart, targetPlayer = getClosestEnemyToCursor()
-            
+
             if targetPart then
                 shootAtEnemy(targetPart, targetPlayer)
                 lastShotTime = now
@@ -313,13 +323,13 @@ local function setupClickShoot()
 end
 
 -- ============================================================
--- FOV CIRCLE (Configurable)
+-- FOV CIRCLE
 -- ============================================================
 local function getFOVColor(isTargeting)
     if isTargeting then
-        return Color3.fromRGB(255, 0, 0)  -- Rojo al apuntar a enemigo
+        return Color3.fromRGB(255, 0, 0)
     else
-        return fovColors[fovColor] or Color3.fromRGB(255, 255, 255)  -- Color configurado
+        return fovColors[fovColor] or Color3.fromRGB(255, 255, 255)
     end
 end
 
@@ -332,16 +342,14 @@ local function setupFOVCircle()
     fovCircle.Filled = false
     fovCircle.NumSides = 64
     fovCircle.Transparency = 1
-    
+
     RunService.RenderStepped:Connect(function()
         if fovCircle and clickShootEnabled then
             local cursorPos = UserInputService:GetMouseLocation()
             fovCircle.Position = Vector2.new(cursorPos.X, cursorPos.Y)
-            
-            -- Solo mostrar si fovVisible está activado
             fovCircle.Visible = fovVisible
             fovCircle.Radius = fovRadius
-            
+
             local target, _ = getClosestEnemyToCursor()
             fovCircle.Color = getFOVColor(target ~= nil)
         elseif fovCircle then
@@ -351,14 +359,14 @@ local function setupFOVCircle()
 end
 
 -- ============================================================
--- TUTORIAL HUB (Mejorado, con UIStroke blanco y X circular)
+-- TUTORIAL HUB
 -- ============================================================
 local function showTutorial()
     local tutorialGui = Instance.new("ScreenGui")
     tutorialGui.Name = "KrysHub_Tutorial"
     tutorialGui.Parent = game:GetService("CoreGui")
     tutorialGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    
+
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 480, 0, 340)
     mainFrame.Position = UDim2.new(0.5, -240, 0.5, -170)
@@ -368,16 +376,16 @@ local function showTutorial()
     mainFrame.Parent = tutorialGui
     mainFrame.Active = true
     mainFrame.Draggable = true
-    
+
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 12)
     corner.Parent = mainFrame
-    
+
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)  -- Borde blanco
+    stroke.Color = Color3.fromRGB(255, 255, 255)
     stroke.Thickness = 1.5
     stroke.Parent = mainFrame
-    
+
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, 0, 0, 45)
     title.Text = "📖 Tutorial"
@@ -386,8 +394,7 @@ local function showTutorial()
     title.Font = Enum.Font.GothamBold
     title.TextSize = 20
     title.Parent = mainFrame
-    
-    -- Botón X circular con solo la letra
+
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.new(0, 34, 0, 34)
     closeBtn.Position = UDim2.new(1, -44, 0, 6)
@@ -400,9 +407,9 @@ local function showTutorial()
     closeBtn.TextSize = 18
     closeBtn.Parent = mainFrame
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(1, 0)  -- Circular
+    btnCorner.CornerRadius = UDim.new(1, 0)
     btnCorner.Parent = closeBtn
-    
+
     -- English Frame
     local engFrame = Instance.new("Frame")
     engFrame.Size = UDim2.new(0.48, -10, 1, -60)
@@ -415,7 +422,7 @@ local function showTutorial()
     local engStroke = Instance.new("UIStroke", engFrame)
     engStroke.Color = Color3.fromRGB(80, 80, 100)
     engStroke.Thickness = 1
-    
+
     local engTitle = Instance.new("TextLabel")
     engTitle.Size = UDim2.new(1, 0, 0, 32)
     engTitle.Text = "🇬🇧 English"
@@ -424,7 +431,7 @@ local function showTutorial()
     engTitle.Font = Enum.Font.GothamBold
     engTitle.TextSize = 15
     engTitle.Parent = engFrame
-    
+
     local engText = Instance.new("TextLabel")
     engText.Size = UDim2.new(1, -15, 1, -42)
     engText.Position = UDim2.new(0, 8, 0, 38)
@@ -437,7 +444,7 @@ local function showTutorial()
     engText.TextYAlignment = Enum.TextYAlignment.Top
     engText.TextWrapped = true
     engText.Parent = engFrame
-    
+
     -- Spanish Frame
     local espFrame = Instance.new("Frame")
     espFrame.Size = UDim2.new(0.48, -10, 1, -60)
@@ -450,7 +457,7 @@ local function showTutorial()
     local espStroke = Instance.new("UIStroke", espFrame)
     espStroke.Color = Color3.fromRGB(80, 80, 100)
     espStroke.Thickness = 1
-    
+
     local espTitle = Instance.new("TextLabel")
     espTitle.Size = UDim2.new(1, 0, 0, 32)
     espTitle.Text = "🇪🇸 Español"
@@ -459,7 +466,7 @@ local function showTutorial()
     espTitle.Font = Enum.Font.GothamBold
     espTitle.TextSize = 15
     espTitle.Parent = espFrame
-    
+
     local espText = Instance.new("TextLabel")
     espText.Size = UDim2.new(1, -15, 1, -42)
     espText.Position = UDim2.new(0, 8, 0, 38)
@@ -472,7 +479,7 @@ local function showTutorial()
     espText.TextYAlignment = Enum.TextYAlignment.Top
     espText.TextWrapped = true
     espText.Parent = espFrame
-    
+
     closeBtn.MouseButton1Click:Connect(function()
         tutorialGui:Destroy()
     end)
@@ -520,7 +527,7 @@ CombatTab:Toggle({
 
 CombatTab:Keybind({
     Title = "Keybind",
-    Value = "ShiftRight",          -- Sin tecla predeterminada, el jugador asigna la suya
+    Value = "ShiftRight",
     Callback = function()
         clickShootEnabled = not clickShootEnabled
         notify("Click Shoot", clickShootEnabled and "ON ✓" or "OFF", 1)
@@ -537,7 +544,7 @@ CombatTab:Slider({
 
 CombatTab:Toggle({
     Title = "Invisible FOV",
-    Value = false,       -- Por defecto, el FOV es visible. El toggle "activado" lo hace invisible.
+    Value = false,
     Callback = function(state)
         fovVisible = not state
         notify("Invisible FOV", state and "Activado (FOV oculto)" or "Desactivado (FOV visible)", 1)
@@ -566,7 +573,7 @@ ESPTab:Toggle({
 
 ESPTab:Keybind({
     Title = "Keybind",
-    Value = "ShiftRight",          -- Sin tecla predeterminada
+    Value = "ShiftRight",
     Callback = function()
         espEnabled = not espEnabled
         updateESP()
@@ -629,5 +636,6 @@ setupFOVCircle()
 notify("KrysHub", "[🌌] Duel Stars!", 5)
 
 print("==========================================")
-print("KrysHub | [🌌] Duel Stars! v2.0.0 (Final)")
+print("KrysHub | [🌌] Duel Stars! v2.0.0 (ESP Fixed)")
+print("ESP forced")
 print("==========================================")
