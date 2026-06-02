@@ -1,7 +1,7 @@
 -- ============================================================
 -- KrysHub | [🌌] Duel Stars!
--- Click Shoot | ESP (Robusto - No se desactiva) | FOV Configurable
--- Versión: 2.0.0 (ESP Fixed con lógica Universal Hub)
+-- Click Shoot | ESP (Ultra Fixed) | FOV Configurable
+-- Versión: 2.0.0 (ESP Definitivo)
 -- ============================================================
 
 task.wait(3)
@@ -47,34 +47,34 @@ local clickShootEnabled = false
 local espEnabled = false
 local notificationsEnabled = true
 local fovVisible = true
-local fovColor = "Blanco"
+local fovColor = "White"
 local fovRadius = 150
 local fovCircle = nil
 local lastShotTime = 0
 local shotDelay = 0.15
 
--- ESP (Robusto - tomado del Universal Hub)
+-- ESP (Robusto)
 local espHighlights = {}
 local espCharacterAddedConns = {}
 local ESPColor = Color3.fromRGB(255, 0, 0)
 local espColorNames = {
-    Rojo = Color3.fromRGB(255, 60, 60),
-    Verde = Color3.fromRGB(60, 200, 110),
-    Azul = Color3.fromRGB(80, 160, 255),
-    Amarillo = Color3.fromRGB(255, 210, 50),
-    Morado = Color3.fromRGB(255, 0, 255),
-    Naranja = Color3.fromRGB(255, 165, 0),
-    Blanco = Color3.fromRGB(255, 255, 255)
+    Red = Color3.fromRGB(255, 60, 60),
+    Green = Color3.fromRGB(60, 200, 110),
+    Blue = Color3.fromRGB(80, 160, 255),
+    Yellow = Color3.fromRGB(255, 210, 50),
+    Purple = Color3.fromRGB(255, 0, 255),
+    Orange = Color3.fromRGB(255, 165, 0),
+    White = Color3.fromRGB(255, 255, 255)
 }
-local selectedESPColor = "Rojo"
+local selectedESPColor = "Red"
 
 -- Colores FOV
 local fovColors = {
-    Verde = Color3.fromRGB(0, 255, 0),
-    Rojo = Color3.fromRGB(255, 0, 0),
-    Blanco = Color3.fromRGB(255, 255, 255),
-    Azul = Color3.fromRGB(0, 100, 255),
-    Amarillo = Color3.fromRGB(255, 255, 0)
+    Green = Color3.fromRGB(0, 255, 0),
+    Red = Color3.fromRGB(255, 0, 0),
+    White = Color3.fromRGB(255, 255, 255),
+    Blue = Color3.fromRGB(0, 100, 255),
+    Yellow = Color3.fromRGB(255, 255, 0)
 }
 
 -- ============================================================
@@ -108,7 +108,7 @@ local function isEnemy(player)
 end
 
 -- ============================================================
--- ESP ROBUSTO (NO SE DESACTIVA)
+-- ESP ULTRA ROBUSTO (NO SE DESACTIVA NUNCA)
 -- ============================================================
 local function addESPToPlayer(player)
     if not espEnabled then return end
@@ -171,7 +171,7 @@ local function setupESPWatcher(player)
     end
 
     espCharacterAddedConns[player] = player.CharacterAdded:Connect(function()
-        task.wait(0.5)
+        task.wait(0.3)
         if espEnabled and isEnemy(player) then
             addESPToPlayer(player)
         end
@@ -188,7 +188,7 @@ end
 Players.PlayerAdded:Connect(function(player)
     setupESPWatcher(player)
     if espEnabled then
-        task.wait(0.5)
+        task.wait(0.3)
         addESPToPlayer(player)
     end
 end)
@@ -206,10 +206,10 @@ LocalPlayer.CharacterAdded:Connect(function()
     updateESP()
 end)
 
--- REFUERZO CONSTANTE (cada segundo)
+-- REFUERZO EXTREMO: cada 0.5 segundos fuerza el ESP
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.5)
         if espEnabled then
             updateESP()
         end
@@ -342,7 +342,7 @@ local function setupFOVCircle()
 end
 
 -- ============================================================
--- TUTORIAL HUB
+-- TUTORIAL HUB (IGUAL QUE ANTES)
 -- ============================================================
 local function showTutorial()
     local tutorialGui = Instance.new("ScreenGui")
@@ -510,7 +510,7 @@ CombatTab:Toggle({
 
 CombatTab:Keybind({
     Title = "Keybind",
-    Value = "ShiftRight",
+    Value = "",
     Callback = function()
         clickShootEnabled = not clickShootEnabled
         notify("Click Shoot", clickShootEnabled and "ON ✓" or "OFF", 1)
@@ -542,7 +542,7 @@ CombatTab:Button({
 })
 
 -- ============================================================
--- UI: ESP TAB
+-- UI: ESP TAB (COLORES EN INGLÉS)
 -- ============================================================
 ESPTab:Toggle({
     Title = "ESP (Highlight)",
@@ -556,7 +556,7 @@ ESPTab:Toggle({
 
 ESPTab:Keybind({
     Title = "Keybind",
-    Value = "ShiftRight",
+    Value = "",
     Callback = function()
         espEnabled = not espEnabled
         updateESP()
@@ -566,8 +566,8 @@ ESPTab:Keybind({
 
 ESPTab:Dropdown({
     Title = "ESP Color",
-    Values = {"Rojo", "Verde", "Azul", "Amarillo", "Morado", "Naranja", "Blanco"},
-    Default = "Rojo",
+    Values = {"Red", "Green", "Blue", "Yellow", "Purple", "Orange", "White"},
+    Default = "Red",
     Callback = function(value)
         selectedESPColor = value
         ESPColor = espColorNames[value] or Color3.fromRGB(255, 255, 255)
@@ -586,8 +586,8 @@ SettingsTab:Paragraph({
 
 SettingsTab:Dropdown({
     Title = "FOV Color",
-    Values = {"Verde", "Rojo", "Blanco", "Azul", "Amarillo"},
-    Default = "Blanco",
+    Values = {"Green", "Red", "White", "Blue", "Yellow"},
+    Default = "White",
     Callback = function(value)
         fovColor = value
         notify("FOV Color", value, 1)
@@ -619,6 +619,6 @@ setupFOVCircle()
 notify("KrysHub", "[🌌] Duel Stars!", 5)
 
 print("==========================================")
-print("KrysHub | [🌌] Duel Stars! v2.0.0 (ESP Fixed)")
-print("ESP forced 1 ")
+print("KrysHub | [🌌] Duel Stars! v2.0.0 (ESP Definitivo)")
+print("ESP: Forced 2")
 print("==========================================")
