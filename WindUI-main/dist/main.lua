@@ -365,12 +365,11 @@ local g=b(game:GetService"LocalizationService")
 local h=b(game:GetService"HttpService")
 
 -- Live User Counter configuration
-local HttpService = game:GetService("HttpService")
-local COUNT_API_NS = "kryshub_v1" -- unique namespace for CountAPI
-local COUNT_KEY = "executions" -- key for counting executions
+local COUNT_API_NS = "kryshub_v1"
+local COUNT_KEY = "executions"
 local HasCountedFile = "WindUI/KrysHub/HasCounted.txt"
 
-d.Heartbeat
+local i = d.Heartbeat
 
 local j="https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"
 
