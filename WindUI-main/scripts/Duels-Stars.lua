@@ -2,7 +2,7 @@
 -- KrysHub | [🌌] Duel Stars!
 -- Click Shoot (FIXED: sin paredes, disparo directo)
 -- ESP (Ultra Robusto + Billboard) | FOV Configurable
--- Versión: 2.1.0 (ESP Mejorado)
+-- Versión: 2.1.0 (Soporte Móvil incluido)
 -- ============================================================
 
 task.wait(3)
@@ -17,7 +17,17 @@ local Window = WindUI:CreateWindow({
     Folder = "KrysHub"
 })
 
+-- ============================================================
+-- DETECCIÓN MÓVIL
+-- ============================================================
+local UserInputService = game:GetService("UserInputService")
+local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local OpenButtonMain = nil
+local uiOpen = true
+
+-- ============================================================
 -- TABS
+-- ============================================================
 local MainTab = Window:Tab({ Title = "Main", Icon = "house" })
 local CombatTab = Window:Tab({ Title = "Combat", Icon = "target" })
 local ESPTab = Window:Tab({ Title = "ESP", Icon = "eye" })
@@ -28,7 +38,6 @@ local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 -- ============================================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -55,8 +64,8 @@ local lastShotTime = 0
 local shotDelay = 0.15
 
 -- ESP (sistema robusto con billboard)
-local espData = {}          -- [player] = {hl, bb, char}
-local espCharConns = {}     -- [player] = connection
+local espData = {}
+local espCharConns = {}
 local ESPColor = Color3.fromRGB(255, 0, 0)
 local espColorNames = {
     Red = Color3.fromRGB(255, 60, 60),
@@ -69,7 +78,6 @@ local espColorNames = {
 }
 local selectedESPColor = "Red"
 
--- Colores FOV
 local fovColors = {
     Green = Color3.fromRGB(0, 255, 0),
     Red = Color3.fromRGB(255, 0, 0),
@@ -85,6 +93,83 @@ local function notify(title, content, duration)
     if notificationsEnabled then
         WindUI:Notify({ Title = title, Content = content, Duration = duration or 2 })
     end
+end
+
+-- ============================================================
+-- FUNCIONES UI PARA MÓVIL
+-- ============================================================
+local function closeUI()
+    if IsMobile and OpenButtonMain then
+        OpenButtonMain.Visible = true
+    end
+    if Window then
+        Window:Close()
+    end
+end
+
+local function openUI()
+    if Window then
+        Window:Open()
+    end
+    if IsMobile and OpenButtonMain then
+        OpenButtonMain.Visible = false
+    end
+end
+
+-- ============================================================
+-- OPENBUTTON SYSTEM (MÓVIL)
+-- ============================================================
+local function setupOpenButton()
+    if not IsMobile then return end
+    
+    OpenButtonMain = Instance.new("TextButton")
+    OpenButtonMain.Name = "OpenButtonMain"
+    OpenButtonMain.Parent = game:GetService("CoreGui")
+    OpenButtonMain.Size = UDim2.new(0, 50, 0, 50)
+    OpenButtonMain.Position = UDim2.new(0, 10, 0, 100)
+    OpenButtonMain.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    OpenButtonMain.BackgroundTransparency = 0.2
+    OpenButtonMain.Text = "▶"
+    OpenButtonMain.TextColor3 = Color3.fromRGB(255, 255, 255)
+    OpenButtonMain.TextSize = 24
+    OpenButtonMain.Font = Enum.Font.GothamBold
+    OpenButtonMain.Visible = false
+    OpenButtonMain.ZIndex = 10
+    
+    local corner = Instance.new("UICorner", OpenButtonMain)
+    corner.CornerRadius = UDim.new(1, 0)
+    
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    
+    OpenButtonMain.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = OpenButtonMain.Position
+        end
+    end)
+    
+    OpenButtonMain.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.Touch then
+            local delta = input.Position - dragStart
+            OpenButtonMain.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    OpenButtonMain.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    
+    OpenButtonMain.MouseButton1Click:Connect(function()
+        if Window then
+            Window:Open()
+            OpenButtonMain.Visible = false
+        end
+    end)
 end
 
 -- ============================================================
@@ -106,7 +191,7 @@ local function isEnemy(player)
 end
 
 -- ============================================================
--- ESP ROBUSTO (con highlight + billboard)
+-- ESP ROBUSTO
 -- ============================================================
 local function removeESP(player)
     if not espData[player] then return end
@@ -132,10 +217,8 @@ local function addESP(player)
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if not humanoid or humanoid.Health <= 0 or not rootPart then return end
 
-    -- Limpiar si ya existe o la referencia está corrupta
     removeESP(player)
 
-    -- Highlight
     local highlight = Instance.new("Highlight")
     highlight.FillColor = ESPColor
     highlight.OutlineColor = ESPColor
@@ -145,7 +228,6 @@ local function addESP(player)
     highlight.Adornee = character
     highlight.Parent = character
 
-    -- Billboard con nombre
     local billboard = Instance.new("BillboardGui")
     billboard.Adornee = rootPart
     billboard.AlwaysOnTop = true
@@ -173,19 +255,16 @@ end
 
 local function updateESP()
     if not espEnabled then
-        -- Limpiar todo
         for plr in pairs(espData) do
             removeESP(plr)
         end
         return
     end
 
-    -- Aplicar a todos los enemigos
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             local data = espData[player]
             local currentChar = player.Character
-            -- Recrear si no existe, o si cambió el personaje, o si highlight/billboard fueron destruidos
             local needRebuild = not data
                 or not data.hl or not data.hl.Parent
                 or not data.bb or not data.bb.Parent
@@ -193,7 +272,6 @@ local function updateESP()
             if needRebuild then
                 addESP(player)
             else
-                -- Solo actualizar color por si cambió
                 data.hl.FillColor = ESPColor
                 data.hl.OutlineColor = ESPColor
                 local lbl = data.bb:FindFirstChildOfClass("TextLabel")
@@ -202,7 +280,6 @@ local function updateESP()
         end
     end
 
-    -- Limpiar jugadores que ya no existen
     for plr in pairs(espData) do
         if not plr.Parent then
             removeESP(plr)
@@ -214,7 +291,6 @@ local function updateESP()
     end
 end
 
--- Watchers para CharacterAdded (recrear ESP al respawn)
 local function setupESPWatcher(player)
     if espCharConns[player] then
         espCharConns[player]:Disconnect()
@@ -226,7 +302,6 @@ local function setupESPWatcher(player)
     end)
 end
 
--- Conectar watchers para jugadores existentes y futuros
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
         setupESPWatcher(player)
@@ -252,7 +327,6 @@ LocalPlayer.CharacterAdded:Connect(function()
     updateESP()
 end)
 
--- Refuerzo periódico (cada segundo, para garantizar que no se desactive)
 task.spawn(function()
     while true do
         task.wait(1)
@@ -263,7 +337,7 @@ task.spawn(function()
 end)
 
 -- ============================================================
--- CLICK SHOOT (con raycast para evitar paredes)
+-- CLICK SHOOT
 -- ============================================================
 local function isVisible(targetPart)
     local origin = Camera.CFrame.Position
@@ -341,7 +415,6 @@ local function shootAtEnemy(targetPart, targetPlayer)
     return true
 end
 
--- Click Shoot event
 local function setupClickShoot()
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
@@ -394,7 +467,7 @@ local function setupFOVCircle()
 end
 
 -- ============================================================
--- TUTORIAL HUB (igual que antes)
+-- TUTORIAL HUB
 -- ============================================================
 local function showTutorial()
     local tutorialGui = Instance.new("ScreenGui")
@@ -595,7 +668,7 @@ CombatTab:Button({
 })
 
 -- ============================================================
--- UI: ESP TAB (con nuevo sistema)
+-- UI: ESP TAB
 -- ============================================================
 local espToggleRef = ESPTab:Toggle({
     Title = "ESP (Highlight + Name)",
@@ -651,7 +724,12 @@ SettingsTab:Keybind({
     Title = "Toggle UI",
     Value = "RightShift",
     Callback = function()
-        Window:Toggle()
+        uiOpen = not uiOpen
+        if uiOpen then
+            openUI()
+        else
+            closeUI()
+        end
     end
 })
 
@@ -666,13 +744,31 @@ SettingsTab:Toggle({
 -- ============================================================
 -- INICIALIZACIÓN
 -- ============================================================
+setupOpenButton()
 setupClickShoot()
 setupFOVCircle()
 
-notify("KrysHub", "[🌌] Duel Stars!", 5)
+-- Si es móvil, al iniciar la UI está abierta, el botón se oculta
+if IsMobile then
+    OpenButtonMain.Visible = false
+    -- Hook para cuando la ventana se cierra/abre manualmente (por si WindUI tiene sus propios métodos)
+    local originalClose = Window.Close
+    local originalOpen = Window.Open
+    Window.Close = function(self)
+        if OpenButtonMain then OpenButtonMain.Visible = true end
+        originalClose(self)
+    end
+    Window.Open = function(self)
+        if OpenButtonMain then OpenButtonMain.Visible = false end
+        originalOpen(self)
+    end
+end
+
+notify("KrysHub", "[🌌] Duel Stars! (Móvil compatible)", 5)
 
 print("==========================================")
 print("KrysHub | [🌌] Duel Stars! v2.1.0")
-print("Click Shoot: Update 1")
-print("ESP: Update 3")
+print("Click Shoot: sin paredes")
+print("ESP: Highlight + Billboard")
+print("Móvil: " .. (IsMobile and "Sí" or "No"))
 print("==========================================")
