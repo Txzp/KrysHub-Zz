@@ -362,7 +362,7 @@ local d=b(game:GetService"RunService")
 local e=b(game:GetService"UserInputService")
 local f=b(game:GetService"TweenService")
 local g=b(game:GetService"LocalizationService")
-local h=b(game:GetService"HttpService")local i=
+local h=b(game:GetService"HttpService")
 
 -- Live User Counter configuration
 local HttpService = game:GetService("HttpService")
