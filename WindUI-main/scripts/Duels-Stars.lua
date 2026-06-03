@@ -1,7 +1,8 @@
 -- ============================================================
 -- KrysHub | [🌌] Duel Stars!
--- Click Shoot | ESP (Ultra Fixed) | FOV Configurable
--- Versión: 2.0.0 (ESP Definitivo)
+-- Click Shoot (FIXED: sin paredes, disparo directo)
+-- ESP (Ultra Robusto + Billboard) | FOV Configurable
+-- Versión: 2.1.0 (ESP Mejorado)
 -- ============================================================
 
 task.wait(3)
@@ -53,9 +54,9 @@ local fovCircle = nil
 local lastShotTime = 0
 local shotDelay = 0.15
 
--- ESP (Robusto)
-local espHighlights = {}
-local espCharacterAddedConns = {}
+-- ESP (sistema robusto con billboard)
+local espData = {}          -- [player] = {hl, bb, char}
+local espCharConns = {}     -- [player] = connection
 local ESPColor = Color3.fromRGB(255, 0, 0)
 local espColorNames = {
     Red = Color3.fromRGB(255, 60, 60),
@@ -91,94 +92,141 @@ end
 -- ============================================================
 local function isEnemy(player)
     if player == LocalPlayer then return false end
-
     local myTeam = LocalPlayer.Team
     local theirTeam = player.Team
     if myTeam and theirTeam then
         return myTeam ~= theirTeam
     end
-
     local myTeamAttr = LocalPlayer:GetAttribute("Team")
     local theirTeamAttr = player:GetAttribute("Team")
     if myTeamAttr and theirTeamAttr then
         return myTeamAttr ~= theirTeamAttr
     end
-
     return true
 end
 
 -- ============================================================
--- ESP ULTRA ROBUSTO (NO SE DESACTIVA NUNCA)
+-- ESP ROBUSTO (con highlight + billboard)
 -- ============================================================
-local function addESPToPlayer(player)
+local function removeESP(player)
+    if not espData[player] then return end
+    pcall(function()
+        if espData[player].hl and espData[player].hl.Parent then
+            espData[player].hl:Destroy()
+        end
+        if espData[player].bb and espData[player].bb.Parent then
+            espData[player].bb:Destroy()
+        end
+    end)
+    espData[player] = nil
+end
+
+local function addESP(player)
     if not espEnabled then return end
     if player == LocalPlayer then return end
     if not isEnemy(player) then return end
 
     local character = player.Character
     if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or humanoid.Health <= 0 or not rootPart then return end
 
-    local humanoid = character:FindFirstChild("Humanoid")
-    if not humanoid or humanoid.Health <= 0 then return end
+    -- Limpiar si ya existe o la referencia está corrupta
+    removeESP(player)
 
-    -- Si ya existe un highlight válido, solo actualizar color
-    if espHighlights[player] and espHighlights[player].Parent then
-        espHighlights[player].FillColor = ESPColor
-        espHighlights[player].OutlineColor = ESPColor
-        return
-    end
-
-    -- Crear nuevo highlight
+    -- Highlight
     local highlight = Instance.new("Highlight")
     highlight.FillColor = ESPColor
     highlight.OutlineColor = ESPColor
-    highlight.FillTransparency = 0.5
+    highlight.FillTransparency = 0.6
     highlight.OutlineTransparency = 0
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Adornee = character
     highlight.Parent = character
-    espHighlights[player] = highlight
-end
 
-local function removeESPFromPlayer(player)
-    if espHighlights[player] then
-        pcall(function() espHighlights[player]:Destroy() end)
-        espHighlights[player] = nil
-    end
+    -- Billboard con nombre
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = rootPart
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffsetWorldSpace = Vector3.new(0, 3.2, 0)
+    billboard.Size = UDim2.new(0, 90, 0, 22)
+    billboard.MaxDistance = 300
+    billboard.Parent = rootPart
+
+    local nameLabel = Instance.new("TextLabel", billboard)
+    nameLabel.Size = UDim2.new(1, 0, 1, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = player.DisplayName
+    nameLabel.TextColor3 = ESPColor
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextSize = 14
+    nameLabel.TextStrokeTransparency = 0.3
+    nameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+    espData[player] = {
+        hl = highlight,
+        bb = billboard,
+        char = character
+    }
 end
 
 local function updateESP()
     if not espEnabled then
-        for player, _ in pairs(espHighlights) do
-            removeESPFromPlayer(player)
+        -- Limpiar todo
+        for plr in pairs(espData) do
+            removeESP(plr)
         end
         return
     end
 
+    -- Aplicar a todos los enemigos
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and isEnemy(player) then
-            addESPToPlayer(player)
-        else
-            removeESPFromPlayer(player)
+        if player ~= LocalPlayer then
+            local data = espData[player]
+            local currentChar = player.Character
+            -- Recrear si no existe, o si cambió el personaje, o si highlight/billboard fueron destruidos
+            local needRebuild = not data
+                or not data.hl or not data.hl.Parent
+                or not data.bb or not data.bb.Parent
+                or data.char ~= currentChar
+            if needRebuild then
+                addESP(player)
+            else
+                -- Solo actualizar color por si cambió
+                data.hl.FillColor = ESPColor
+                data.hl.OutlineColor = ESPColor
+                local lbl = data.bb:FindFirstChildOfClass("TextLabel")
+                if lbl then lbl.TextColor3 = ESPColor end
+            end
+        end
+    end
+
+    -- Limpiar jugadores que ya no existen
+    for plr in pairs(espData) do
+        if not plr.Parent then
+            removeESP(plr)
+            if espCharConns[plr] then
+                espCharConns[plr]:Disconnect()
+                espCharConns[plr] = nil
+            end
         end
     end
 end
 
--- Watchers para respawn
+-- Watchers para CharacterAdded (recrear ESP al respawn)
 local function setupESPWatcher(player)
-    if espCharacterAddedConns[player] then
-        espCharacterAddedConns[player]:Disconnect()
+    if espCharConns[player] then
+        espCharConns[player]:Disconnect()
     end
-
-    espCharacterAddedConns[player] = player.CharacterAdded:Connect(function()
-        task.wait(0.3)
-        if espEnabled and isEnemy(player) then
-            addESPToPlayer(player)
-        end
+    espCharConns[player] = player.CharacterAdded:Connect(function()
+        removeESP(player)
+        task.wait(0.5)
+        addESP(player)
     end)
 end
 
--- Conectar eventos para todos los jugadores
+-- Conectar watchers para jugadores existentes y futuros
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
         setupESPWatcher(player)
@@ -187,17 +235,15 @@ end
 
 Players.PlayerAdded:Connect(function(player)
     setupESPWatcher(player)
-    if espEnabled then
-        task.wait(0.3)
-        addESPToPlayer(player)
-    end
+    task.wait(0.5)
+    addESP(player)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-    removeESPFromPlayer(player)
-    if espCharacterAddedConns[player] then
-        espCharacterAddedConns[player]:Disconnect()
-        espCharacterAddedConns[player] = nil
+    removeESP(player)
+    if espCharConns[player] then
+        espCharConns[player]:Disconnect()
+        espCharConns[player] = nil
     end
 end)
 
@@ -206,10 +252,10 @@ LocalPlayer.CharacterAdded:Connect(function()
     updateESP()
 end)
 
--- REFUERZO EXTREMO: cada 0.5 segundos fuerza el ESP
+-- Refuerzo periódico (cada segundo, para garantizar que no se desactive)
 task.spawn(function()
     while true do
-        task.wait(0.5)
+        task.wait(1)
         if espEnabled then
             updateESP()
         end
@@ -217,60 +263,72 @@ task.spawn(function()
 end)
 
 -- ============================================================
--- DETECTAR ENEMIGO EN FOV
+-- CLICK SHOOT (con raycast para evitar paredes)
 -- ============================================================
-local function getClosestEnemyToCursor()
-    local cursorPos = UserInputService:GetMouseLocation()
-    local cursorX = cursorPos.X
-    local cursorY = cursorPos.Y
+local function isVisible(targetPart)
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin).Unit
+    local distance = (targetPart.Position - origin).Magnitude
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    local result = workspace:Raycast(origin, direction * distance, rayParams)
+    if result and result.Instance then
+        local hitModel = result.Instance:FindFirstAncestorOfClass("Model")
+        return hitModel == targetPart.Parent
+    end
+    return false
+end
 
-    local closestTarget = nil
-    local closestDistance = fovRadius
-    local closestPlayer = nil
+local function getVisibleEnemyAtCursor()
+    local cursorPos = UserInputService:GetMouseLocation()
+    local cursorX, cursorY = cursorPos.X, cursorPos.Y
+
+    local bestTargetPart = nil
+    local bestDistance = fovRadius
+    local bestPlayer = nil
+
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = { LocalPlayer.Character }
 
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and isEnemy(player) and player.Character then
+        if isEnemy(player) and player.Character then
+            local hrp = player.Character:FindFirstChild("HumanoidRootPart")
             local humanoid = player.Character:FindFirstChild("Humanoid")
-            local head = player.Character:FindFirstChild("Head")
-            local targetPart = head or player.Character:FindFirstChild("HumanoidRootPart")
-
-            if humanoid and humanoid.Health > 0 and targetPart then
-                local screenPos, isOnScreen = Camera:WorldToViewportPoint(targetPart.Position)
-
-                if isOnScreen then
-                    local distanceFromCursor = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(cursorX, cursorY)).Magnitude
-
-                    if distanceFromCursor <= fovRadius and distanceFromCursor < closestDistance then
-                        closestDistance = distanceFromCursor
-                        closestTarget = targetPart
-                        closestPlayer = player
+            if hrp and humanoid and humanoid.Health > 0 then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+                if onScreen then
+                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(cursorX, cursorY)).Magnitude
+                    if dist <= fovRadius and dist < bestDistance then
+                        local origin = Camera.CFrame.Position
+                        local direction = (hrp.Position - origin).Unit
+                        local ray = workspace:Raycast(origin, direction * 500, rayParams)
+                        if ray and ray.Instance then
+                            local hitModel = ray.Instance:FindFirstAncestorOfClass("Model")
+                            if hitModel == player.Character then
+                                bestDistance = dist
+                                bestTargetPart = hrp
+                                bestPlayer = player
+                            end
+                        end
                     end
                 end
             end
         end
     end
-
-    return closestTarget, closestPlayer
+    return bestTargetPart, bestPlayer
 end
 
--- ============================================================
--- DISPARAR
--- ============================================================
 local function shootAtEnemy(targetPart, targetPlayer)
-    if not targetPart then return false end
-    if not FireWeapon then return false end
-
+    if not targetPart or not FireWeapon then return false end
     local character = LocalPlayer.Character
     if not character then return false end
-
     local gunTool = character:FindFirstChild("GunTool") or character:FindFirstChild("Gun")
     if not gunTool then return false end
-
     local handle = gunTool:FindFirstChild("Handle")
     local origin = handle and handle.Position or character:FindFirstChild("HumanoidRootPart").Position
-
     local targetPosition = targetPart.Position
-
     pcall(function()
         FireWeapon:FireServer("Gun", CFrame.new(targetPosition), {
             Origin = origin,
@@ -280,27 +338,22 @@ local function shootAtEnemy(targetPart, targetPlayer)
             EnemyUserId = targetPlayer and targetPlayer.UserId or 0
         })
     end)
-
     return true
 end
 
--- ============================================================
--- CLICK SHOOT
--- ============================================================
+-- Click Shoot event
 local function setupClickShoot()
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
+        if not clickShootEnabled then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 
-        if clickShootEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local now = tick()
-            if now - lastShotTime < shotDelay then return end
-
-            local targetPart, targetPlayer = getClosestEnemyToCursor()
-
-            if targetPart then
-                shootAtEnemy(targetPart, targetPlayer)
-                lastShotTime = now
-            end
+        local now = tick()
+        if now - lastShotTime < shotDelay then return end
+        local targetPart, targetPlayer = getVisibleEnemyAtCursor()
+        if targetPart then
+            shootAtEnemy(targetPart, targetPlayer)
+            lastShotTime = now
         end
     end)
 end
@@ -332,8 +385,7 @@ local function setupFOVCircle()
             fovCircle.Position = Vector2.new(cursorPos.X, cursorPos.Y)
             fovCircle.Visible = fovVisible
             fovCircle.Radius = fovRadius
-
-            local target, _ = getClosestEnemyToCursor()
+            local target, _ = getVisibleEnemyAtCursor()
             fovCircle.Color = getFOVColor(target ~= nil)
         elseif fovCircle then
             fovCircle.Visible = false
@@ -342,7 +394,7 @@ local function setupFOVCircle()
 end
 
 -- ============================================================
--- TUTORIAL HUB (IGUAL QUE ANTES)
+-- TUTORIAL HUB (igual que antes)
 -- ============================================================
 local function showTutorial()
     local tutorialGui = Instance.new("ScreenGui")
@@ -475,7 +527,7 @@ local displayName = LocalPlayer.DisplayName or LocalPlayer.Name
 
 MainTab:Paragraph({
     Title = "Welcome To KrysHub @ " .. displayName,
-    Desc = "[🌌] Duel Stars! | v2.0.0\n\nCredit: 4kryx👑\n\nThx For Used I Love You ❤️"
+    Desc = "[🌌] Duel Stars! | v2.1.0\n\nCredit: 4kryx👑\n\nThx For Used I Love You ❤️"
 })
 
 MainTab:Paragraph({
@@ -499,7 +551,7 @@ MainTab:Paragraph({
 -- ============================================================
 -- UI: COMBAT TAB
 -- ============================================================
-CombatTab:Toggle({
+local clickShootToggleRef = CombatTab:Toggle({
     Title = "Click Shoot",
     Value = false,
     Callback = function(state)
@@ -510,23 +562,24 @@ CombatTab:Toggle({
 
 CombatTab:Keybind({
     Title = "Keybind",
-    Value = "",
+    Value = "ShiftRight",
     Callback = function()
-        clickShootEnabled = not clickShootEnabled
-        notify("Click Shoot", clickShootEnabled and "ON ✓" or "OFF", 1)
+        if clickShootToggleRef then
+            clickShootToggleRef:SetState(not clickShootToggleRef.Value)
+        end
     end
 })
 
 CombatTab:Slider({
     Title = "FOV Size",
-    Value = { Min = 50, Max = 300, Default = 150 },
+    Value = { Min = 50, Max = 200, Default = 150 },
     Callback = function(value)
         fovRadius = value
     end
 })
 
 CombatTab:Toggle({
-    Title = "Invisible FOV",
+    Title = "Hide FOV",
     Value = false,
     Callback = function(state)
         fovVisible = not state
@@ -542,10 +595,10 @@ CombatTab:Button({
 })
 
 -- ============================================================
--- UI: ESP TAB (COLORES EN INGLÉS)
+-- UI: ESP TAB (con nuevo sistema)
 -- ============================================================
-ESPTab:Toggle({
-    Title = "ESP (Highlight)",
+local espToggleRef = ESPTab:Toggle({
+    Title = "ESP (Highlight + Name)",
     Value = false,
     Callback = function(state)
         espEnabled = state
@@ -556,11 +609,11 @@ ESPTab:Toggle({
 
 ESPTab:Keybind({
     Title = "Keybind",
-    Value = "",
+    Value = "ShiftRight",
     Callback = function()
-        espEnabled = not espEnabled
-        updateESP()
-        notify("ESP", espEnabled and "ON ✓" or "OFF", 1)
+        if espToggleRef then
+            espToggleRef:SetState(not espToggleRef.Value)
+        end
     end
 })
 
@@ -619,6 +672,7 @@ setupFOVCircle()
 notify("KrysHub", "[🌌] Duel Stars!", 5)
 
 print("==========================================")
-print("KrysHub | [🌌] Duel Stars! v2.0.0 (ESP Definitivo)")
-print("ESP: Forced 2")
+print("KrysHub | [🌌] Duel Stars! v2.1.0")
+print("Click Shoot: Update 1")
+print("ESP: Update 3")
 print("==========================================")
