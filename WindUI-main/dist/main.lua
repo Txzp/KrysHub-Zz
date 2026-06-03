@@ -364,6 +364,12 @@ local f=b(game:GetService"TweenService")
 local g=b(game:GetService"LocalizationService")
 local h=b(game:GetService"HttpService")local i=
 
+-- Live User Counter configuration
+local HttpService = game:GetService("HttpService")
+local COUNT_API_NS = "kryshub_v1" -- unique namespace for CountAPI
+local COUNT_KEY = "executions" -- key for counting executions
+local HasCountedFile = "WindUI/KrysHub/HasCounted.txt"
+
 d.Heartbeat
 
 local j="https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"
@@ -11844,6 +11850,74 @@ au.UIElements.SideBar,
 
 if au.ScrollBarEnabled then
 aq(au.UIElements.SideBar,au.UIElements.SideBarContainer.Content,au,3)
+end
+
+-- Create Live User Count label in the SideBar
+do
+    local label = Instance.new("TextLabel")
+    label.Name = "LiveUserCount"
+    label.Size = UDim2.new(1,0,0,20)
+    label.BackgroundTransparency = 1
+    label.Text = "Users: --"
+    label.TextColor3 = Color3.new(1,1,1)
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 16
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.LayoutOrder = 1
+    if au.UIElements and au.UIElements.SideBarContainer and au.UIElements.SideBarContainer.Content then
+        pcall(function() label.Parent = au.UIElements.SideBarContainer.Content end)
+    end
+    au.UIElements.UserCountLabel = label
+
+    -- ManageUserCount: fetch and optionally increment unique count via CountAPI
+    local function ManageUserCount()
+        task.spawn(function()
+            local Players = game:GetService("Players")
+            local rs = game:GetService("RunService")
+            local player = Players.LocalPlayer
+            if not player then
+                Players.PlayerAdded:Wait()
+                player = Players.LocalPlayer
+            end
+            local userId = tostring(player.UserId)
+
+            local counted = false
+            local countedPath = (au.Folder or "WindUI").."/KrysHub_HasCounted_"..userId..".txt"
+            if (not rs:IsStudio()) and isfile and readfile and writefile then
+                if isfile(countedPath) then counted = true end
+            else
+                if getgenv and getgenv()["Kryshub_Counted_"..userId] then counted = true end
+            end
+
+            -- Get current value
+            local ok, raw = pcall(function()
+                return HttpService:GetAsync("https://api.countapi.xyz/get/"..COUNT_API_NS.."/"..COUNT_KEY)
+            end)
+            if ok and raw then
+                local success, decoded = pcall(function() return HttpService:JSONDecode(raw) end)
+                local value = decoded and decoded.value or tonumber(raw) or 0
+                pcall(function()
+                    if au.UIElements and au.UIElements.UserCountLabel then
+                        au.UIElements.UserCountLabel.Text = "Users: "..tostring(value)
+                    end
+                end)
+            end
+
+            if not counted then
+                pcall(function()
+                    HttpService:GetAsync("https://api.countapi.xyz/hit/"..COUNT_API_NS.."/"..COUNT_KEY)
+                end)
+                if (not rs:IsStudio()) and isfile and writefile then
+                    pcall(writefile, countedPath, userId)
+                else
+                    if getgenv then getgenv()["Kryshub_Counted_"..userId] = true end
+                end
+            end
+        end)
+    end
+
+    -- start
+    pcall(ManageUserCount)
 end
 
 au.UIElements.MainBar=am("Frame",{
